@@ -31,11 +31,11 @@ jobs:
         run: |
           go version  # 打印 Go 版本确认安装成功
           go build --tags "fts5" -ldflags "-w -s"  # 构建项目
-          if ("${{ matrix.os }}" -eq "macos-11") {
-            echo "matrix.os:macos-11";
-          } else {
-            echo "matrix.os:macos-latest";
-          }
+          if [ "${{ matrix.os }}" == "macos-11" ]; then
+           echo "matrix.os:macos-11"
+          else
+            echo "matrix.os:macos-latest"
+          fi
 
       - name: upload artifacts macos
         uses: actions/upload-artifact@v3
