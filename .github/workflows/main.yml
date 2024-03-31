@@ -34,15 +34,18 @@ jobs:
             else
               mv ./gpressdatadir/fts5/libsimple.dylib ./gpressdatadir/fts5/temp.dylib
             fi
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
           else
             if [ "${{ matrix.arch }}" == "arm64" ]; then
               mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
             else
               mv ./gpressdatadir/fts5/libsimple.so ./gpressdatadir/fts5/temp.so
             fi
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
           fi
-          rm -rf ./gpressdatadir/fts5/libsimple*
-          mv ./gpressdatadir/fts5/temp.* ./gpressdatadir/fts5/libsimple.*
+          
           mv ./gpressdatadir ./temp/gpress/
 
       - name: Upload artifacts
