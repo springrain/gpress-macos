@@ -1,0 +1,42 @@
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  workflow_dispatch:
+    # 手动触发
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  MacOS:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+        - os: macos-11  ### X86 CPU
+        - os: macos-latest ##M1 CPU
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: 
+          submodules: recursive
+
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.22'  # 指定 Go 版本
+
+      - name: Build project
+        run: |
+          go version  # 打印 Go 版本确认安装成功
+          go build --tags "fts5" -ldflags "-w -s"  # 构建项目
+
+      - name: upload artifacts macos
+        uses: actions/upload-artifact@v3
+        with:
+          name: gpress-${{ matrix.os }}
+          path: ${{ github.workspace }}/gpress.app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
