@@ -14,8 +14,10 @@ jobs:
       fail-fast: true
       matrix:
         include:
-        - os: macos-11  ### X86 CPU
-        - os: macos-latest ##M1 CPU
+        - os: macos-arm64  ##M1 CPU
+        - os: macos-latest 
+        #- os: macos-11  ### X86 CPU
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,7 +36,7 @@ jobs:
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
           mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
 
-          if [ "${{ matrix.os }}" == "macos-11" ]; then
+          if [ "${{ matrix.os }}" == "macos-latest" ]; then
             mv ./gpressdatadir/fts5/libsimple.dylib-amd64 ./gpressdatadir/fts5/temp.dylib
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
@@ -71,7 +73,7 @@ jobs:
       - name: Build project
         run: |
           go version  # 打印 Go 版本确认安装成功
-          go build --tags "arm,fts5" -ldflags "-w -s"  # 构建项目
+          go build --tags "fts5" -ldflags "-w -s"  # 构建项目
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
           mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
         
