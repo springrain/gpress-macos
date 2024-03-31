@@ -44,12 +44,11 @@ jobs:
             mv ./gpressdatadir/fts5/temp.dylib-amd64 ./gpressdatadir/fts5/libsimple.dylib
           fi
           mv ./gpressdatadir ./gpress/
-          zip -r gpress-darwin-${{ matrix.os }}.zip ./gpress
       - name: upload artifacts macos
         uses: actions/upload-artifact@v3
         with:
           name: gpress-${{ matrix.os }}
-          path: ${{ github.workspace }}/gpress-darwin-${{ matrix.os }}.zip
+          path: ${{ github.workspace }}/gpress
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
