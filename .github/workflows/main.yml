@@ -31,17 +31,27 @@ jobs:
         run: |
           go version  # 打印 Go 版本确认安装成功
           go build --tags "fts5" -ldflags "-w -s"  # 构建项目
-          if [ "${{ matrix.os }}" == "macos-11" ]; then
-           echo "matrix.os:macos-11"
-          else
-            echo "matrix.os:macos-latest"
-          fi
+          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip
+          mkdir -p ./gpress-darwin 
+          mv ./gpress ./gpress2
+          mv gpress2 gpress
 
+          if [ "${{ matrix.os }}" == "macos-11" ]; then
+            mv ./gpressdatadir/fts5/libsimple.dylib-amd64 ./gpressdatadir/fts5/temp.dylib-amd64
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dylib-amd64 ./gpressdatadir/fts5/libsimple.dylib
+          else
+            mv ./gpressdatadir/fts5/libsimple.dylib ./gpressdatadir/fts5/temp.dylib-amd64
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dylib-amd64 ./gpressdatadir/fts5/libsimple.dylib
+          fi
+          mv ./gpressdatadir ./gpress/
+          zip -r gpress-darwin-${{ matrix.os }}.zip ./gpress
       - name: upload artifacts macos
         uses: actions/upload-artifact@v3
         with:
           name: gpress-${{ matrix.os }}
-          path: ${{ github.workspace }}/gpress
+          path: ${{ github.workspace }}/gpress-darwin-${{ matrix.os }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
