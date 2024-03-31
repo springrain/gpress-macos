@@ -31,10 +31,10 @@ jobs:
         run: |
           go version  # 打印 Go 版本确认安装成功
           go build --tags "fts5" -ldflags "-w -s"  # 构建项目
-          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip
+          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
           mkdir -p ./gpress-darwin 
-          mv ./gpress ./gpress2
-          mv gpress2 gpress
+          mv ./gpress ./gpress-darwin
+          mv gpress-darwin gpress
 
           if [ "${{ matrix.os }}" == "macos-11" ]; then
             mv ./gpressdatadir/fts5/libsimple.dylib-amd64 ./gpressdatadir/fts5/temp.dylib-amd64
