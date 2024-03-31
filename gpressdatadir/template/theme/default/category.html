@@ -1,0 +1,73 @@
+<!-- 查询 content 列表 -->
+{{ $contentSQL :="id,title,hrefURL,updateTime FROM content WHERE status=1 and categoryID=? order by sortNo desc" }}
+{{ $categorySQL := "name FROM category WHERE id=? and status<2 order by sortNo desc"}}
+
+
+{{ if eq .userType 1}}
+  {{ $contentSQL ="id,title,hrefURL,updateTime FROM content WHERE categoryID=? order by sortNo desc" }}
+  {{ $categorySQL = "name FROM category WHERE id=? order by sortNo desc"}}
+{{end}}
+
+{{ $selectList := selectList "content" .q .pageNo 20 $contentSQL .UrlPathParam }}
+
+{{ $nav := selectOne "category" $categorySQL .UrlPathParam }}
+{{ $site:=site }}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <title>{{ $nav.Name }}</title>
+  <meta name="description" content="{{ $site.Description }}" />
+  <meta name="keyword" content="{{ $site.Keyword }}" />
+
+{{template "bodystart.html"  }}
+
+<section id="archive" class="archive">
+  <div class="archive-title category">
+        <h2 class="archive-name">{{$nav.Name}}</h2>
+  </div>
+  {{ range $k,$v := $selectList.Data }}
+  <div class="archive-post">
+      <span class="archive-post-time">
+        {{ slice .UpdateTime 0 10 }}
+      </span>
+      <span class="archive-post-title">
+        {{ if eq $.userType 1}}
+        <a href="{{basePath}}admin/content/look?id={{.Id}}" class="archive-post-link">
+        {{else}}
+        <a href="{{basePath}}post/{{.Id}}" class="archive-post-link">
+        {{ end }}
+
+          {{ .Title }}
+        </a>
+      </span>
+  </div>
+  {{end}}
+    
+    
+</section>
+  
+<nav class="pagination">
+  {{$currPageNo := $selectList.Page.PageNo}}
+  {{if lt $currPageNo 1}}
+    {{$currPageNo = 1}}
+  {{end}}
+  {{if gt $currPageNo $selectList.Page.PageCount }}
+     {{$currPageNo = $selectList.Page.PageCount}}
+  {{end}}
+
+  {{if gt $currPageNo 1}}
+  <a class="prev" href="{{basePath}}category/{{.UrlPathParam}}/page/{{ addInt $currPageNo -1 }}?q={{.q}}">
+      <i class="iconfont icon-left"></i>
+      <span class="prev-text">上一页</span>
+    </a>
+  {{end}}
+  {{if lt $currPageNo $selectList.Page.PageCount}}
+  <a class="next" href="{{basePath}}category/{{.UrlPathParam}}/page/{{ addInt $currPageNo 1 }}?q={{.q}}">
+      <span class="next-text">下一页</span>
+      <i class="iconfont icon-right"></i>
+    </a>
+    {{end}}   
+</nav>
+        
+
+  {{template "bodyend.html" }}

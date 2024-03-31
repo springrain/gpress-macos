@@ -1,0 +1,103 @@
+{{template "admin/header.html"}}
+<title>更新设置 - GPRESS</title>
+
+<script type="text/javascript" src="{{basePath}}admin/js/sha3.min.js"></script>
+{{template "admin/bodystart.html"}}
+        <div class="layui-card layui-panel" style="height: 100%;">
+          <div class="layui-card-header">
+            更新设置
+          </div>
+          <div class="layui-card-body">
+            <form class="layui-form" id="gpress-form" action="{{basePath}}admin/{{.UrlPathParam}}/update" method="POST">
+				<div class="layui-form-item layui-col-md6">
+				  <label class="layui-form-label">ID</label>
+				  <div class="layui-input-block">
+					<input type="hidden" name="id" id="id" value="{{.Data.Id}}" />
+					
+				    <input type="hidden" name="sortNo" id="sortNo" value=1 />
+				    <input type="hidden" name="status" id="status" value=1 />
+					<input type="text" class="layui-input" disabled value="{{.Data.Id}}" />
+				  </div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">基础路径</label>
+					<div class="layui-input-block">
+					  <input type="text" name="basePath"  autocomplete="off" class="layui-input" value="{{.Data.BasePath}}">
+					</div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">jwt key</label>
+					<div class="layui-input-block">
+					  <input type="text" name="jwttokenKey" lay-verify="required" lay-reqtext="请填写jwt key" autocomplete="off" class="layui-input" value="{{.Data.JwttokenKey}}">
+					</div>
+				  </div>
+				<div class="layui-form-item layui-col-md6">
+				  <label class="layui-form-label">jwt密钥</label>
+				  <div class="layui-input-block">
+					<input type="password" name="jwtSecret" lay-verify="required" lay-reqtext="请填写jwt密钥" autocomplete="off" class="layui-input" value="{{.Data.JwtSecret}}" lay-affix="eye">
+				  </div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">ip:端口</label>
+					<div class="layui-input-block">
+					  <input type="text" name="serverPort" lay-verify="required" lay-reqtext="请填写ip:端口" autocomplete="off" class="layui-input" value="{{.Data.ServerPort}}">
+					</div>
+				</div>
+				
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">超时时间</label>
+					<div class="layui-input-block">
+					  <input type="number" name="timeout" lay-verify="required" lay-reqtext="请填写超时时间" autocomplete="off" class="layui-input" value="{{.Data.Timeout}}">
+					</div>
+				</div>	
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">最大的请求</label>
+					<div class="layui-input-block">
+					  <input type="number" name="maxRequestBodySize"  autocomplete="off" class="layui-input" value="{{.Data.MaxRequestBodySize}}">
+					</div>
+				</div>				
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+					  <button type="submit" class="layui-btn layui-bg-blue" lay-submit lay-filter="gpress-form-ajax-update">提交修改</button>
+					</div>
+				</div>
+			</form>
+          </div>
+        </div>
+{{template "admin/bodyend.html"}}
+
+<script>
+	layui.use(function(){
+	  var form = layui.form;
+	  var layer = layui.layer;
+	  var $ =layui.jquery;
+
+	  // 提交事件
+	  form.on('submit(gpress-form-ajax-update)', function(data){
+		var field = data.field; // 获取表单字段值
+		field.sortNo=field.sortNo-0;
+		field.status=field.status-0;
+		field.timeout=field.timeout-0;
+		field.maxRequestBodySize=field.maxRequestBodySize-0;
+		const form = document.getElementById('gpress-form');
+		$.ajax({
+			url:form.action,
+			type:form.method,
+			contentType: "application/json;charset=utf-8",
+			dataType:"json",
+			data:JSON.stringify(field),
+			error:function(){
+				layer.msg("修改错误,请重试!");
+			},
+			success:function(result){
+				if (result.statusCode == 1) {
+					layer.msg("设置修改成功,重启gpress才能生效!");
+				}else{
+					layer.msg("修改失败!");
+				}
+			}
+		});
+        return false; // 阻止默认 form 跳转
+	  });
+	});
+	</script>

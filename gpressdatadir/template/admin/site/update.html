@@ -1,0 +1,168 @@
+{{template "admin/header.html"}}
+<title>更新站点信息 - GPRESS</title>
+{{ $themeName := themeName }} 
+{{template "admin/bodystart.html"}}
+        <div class="layui-card layui-panel" style="height: 100%;">
+          <div class="layui-card-header">
+            更新站点信息
+          </div>
+          <div class="layui-card-body">
+            <form class="layui-form" id="gpress-form" action="{{basePath}}admin/{{.UrlPathParam}}/update" method="POST">
+				<div class="layui-form-item layui-col-md6">
+				  <label class="layui-form-label">ID</label>
+				  <div class="layui-input-block">
+					<input type="hidden" name="id" id="id" value="{{.Data.Id}}" />
+				    <input type="hidden" name="sortNo" id="sortNo" value=1 />
+				    <input type="hidden" name="status" id="status" value=1 />
+					<input type="text" class="layui-input" disabled value="{{.Data.Id}}" />
+				  </div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">标题</label>
+					<div class="layui-input-block">
+					  <input type="text" name="title" lay-verify="required" autocomplete="off" lay-reqtext="请填写标题" class="layui-input"  value="{{.Data.Title}}">
+					</div>
+				</div>
+
+				<div class="layui-form-item layui-col-md6">
+				  <label class="layui-form-label">名称</label>
+				  <div class="layui-input-block">
+					<input type="text" name="name" lay-verify="required" autocomplete="off" lay-reqtext="请填写名称" class="layui-input" value="{{.Data.Name}}">
+				  </div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+				  <label class="layui-form-label">域名</label>
+				  <div class="layui-input-block">
+					<input type="text" name="domain" autocomplete="off" class="layui-input" value="{{.Data.Domain}}">
+				  </div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">主题 &nbsp;<i class="layui-icon layui-icon-tips" title="主题在gpressdatadir/template/theme目录下"></i></label>
+					<div class="layui-input-block">
+
+						<select name="theme" id="theme" lay-verify="required" lay-reqtext="请选择主题">
+							{{ range $index,$obj := $themeName }}
+							<option value='{{$obj}}'>{{$obj}}</option>
+							{{end}}
+						</select>
+					</div>
+				</div>	
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">keyword</label>
+					<div class="layui-input-block">
+					  <input type="text" name="keyword" autocomplete="off" class="layui-input" value="{{.Data.Keyword}}">
+					</div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">站点描述</label>
+					<div class="layui-input-block">
+					  <input type="text" name="description" autocomplete="off" class="layui-input" value="{{.Data.Description}}">
+					</div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">Logo</label>
+					<div class="layui-input-block" style="display: flex;justify-content: space-between;align-items: center;">
+					  <input type="text" name="logo" id="logo" autocomplete="off" class="layui-input" value="{{.Data.Logo}}"> &nbsp;
+						<button type="button" class="layui-btn" id="button-upload-logo">
+							<i class="layui-icon layui-icon-upload"></i> 上传图片
+						</button> &nbsp;
+						<img height="38px" src="{{.Data.Logo}}" id="img_logo"/>
+				   </div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">Favicon</label>
+					<div class="layui-input-block" style="display: flex;justify-content: space-between;align-items: center;">
+					  <input type="text" name="favicon" id="favicon" autocomplete="off" class="layui-input" value="{{.Data.Favicon}}"> &nbsp;
+					  <button type="button" class="layui-btn" id="button-upload-favicon">
+						<i class="layui-icon layui-icon-upload"></i> 上传图片
+					</button> &nbsp;
+					<img height="38px" src="{{.Data.Favicon}}" id="img_favicon" />
+				
+				</div>
+				</div>
+				<div class="layui-form-item layui-col-md6">
+					<label class="layui-form-label">底部信息</label>
+					<div class="layui-input-block">
+					  <textarea name="footer" placeholder="底部信息"  autocomplete="off" class="layui-textarea">{{.Data.Footer}}</textarea>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-input-block">
+					  <button type="submit" class="layui-btn layui-bg-blue" lay-submit lay-filter="gpress-form-ajax-update">提交修改</button>
+					</div>
+				</div>
+			</form>
+          </div>
+        </div>
+{{template "admin/bodyend.html"}}
+
+<script>
+	layui.use(function(){
+	  var form = layui.form;
+	  var layer = layui.layer;
+	  var $ = layui.jquery;
+      var upload = layui.upload;
+	      //选中导航菜单
+		  $("#theme option[value='{{.Data.Theme}}']").attr("selected", true);
+
+
+		// 上传logo
+		upload.render({
+			elem: '#button-upload-logo',
+			url: '{{basePath}}admin/upload', // 此处配置你自己的上传接口即可
+			size: 5 * 1024, // 限制文件大小,单位 KB
+			done: function (res) {
+				if (res.statusCode == 1) {
+					$("#img_logo").attr("src",  res.data);
+					$("#logo").val(res.data);
+				}
+				console.log(res);
+			}
+		});
+
+		// 上传favicon
+		upload.render({
+			elem: '#button-upload-favicon',
+			url: '{{basePath}}admin/upload', // 此处配置你自己的上传接口即可
+			size: 5 * 1024, // 限制文件大小,单位 KB
+			done: function (res) {
+				if (res.statusCode == 1) {
+					$("#img_favicon").attr("src",  res.data);
+					$("#favicon").val(res.data);
+				}
+				console.log(res);
+			}
+		});
+
+	  // 渲染全部表单
+	  form.render(); 
+
+
+	  // 提交事件
+	  form.on('submit(gpress-form-ajax-update)', function(data){
+		var field = data.field; // 获取表单字段值
+		field.sortNo=field.sortNo-0;
+		field.status=field.status-0;
+		const form = document.getElementById('gpress-form');
+		$.ajax({
+			url:form.action,
+			type:form.method,
+			contentType: "application/json;charset=utf-8",
+			dataType:"json",
+			data:JSON.stringify(field),
+			error:function(){
+				layer.msg("修改错误,请重试!");
+			},
+			success:function(result){
+				if (result.statusCode == 1) {
+					layer.msg("站点信息修改成功,请 刷新站点 ");
+				}else{
+					layer.msg("修改失败!");
+				}
+			}
+		});
+        return false; // 阻止默认 form 跳转
+
+	  });
+	});
+	</script>

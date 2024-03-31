@@ -1,0 +1,68 @@
+{{ $site:=site }}
+<!-- 查询 content 列表 -->
+{{ $selectList := selectList "content" .q .pageNo 20 "id,title,hrefURL,categoryID,categoryName,summary,updateTime FROM content WHERE status=1 order by sortNo desc"  }}
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <title>{{ $site.Title }}</title>
+  <meta name="description" content="{{ $site.Description }}" />
+  <meta name="keyword" content="{{ $site.Keyword }}" />
+
+{{template "bodystart.html" }}
+
+<input type="hidden" id="search-q" value="{{.q}}" />
+
+<section id="posts" class="posts">
+
+{{ range $k,$v := $selectList.Data }}
+<article class="post">
+  <header class="post-header">
+    <h1 class="post-title"><a class="post-link" href="{{basePath}}post/{{.Id}}">{{ .Title }}</a></h1>
+    <div class="post-meta">
+      <span class="post-time">{{ slice .UpdateTime 0 10 }}</span>
+      <div class="post-category">
+          <a href="{{basePath}}category/{{ .CategoryID }}">{{ .CategoryName }}</a>
+          </div>
+    </div>
+  </header>
+  
+  <div class="post-content">
+    <div class="post-summary">
+      {{ .Summary }} 
+    </div>
+    <div class="read-more">
+      <a href="{{basePath}}post/{{.Id}}" class="read-more-link">阅读更多</a>
+    </div>
+  </div>
+</article>
+{{ end }}
+
+
+</section>
+  
+<nav class="pagination">
+  {{$currPageNo := $selectList.Page.PageNo}}
+  {{if lt $currPageNo 1}}
+    {{$currPageNo = 1}}
+  {{end}}
+  {{if gt $currPageNo $selectList.Page.PageCount }}
+     {{$currPageNo = $selectList.Page.PageCount}}
+  {{end}}
+
+  {{if gt $currPageNo 1}}
+  <a class="prev" href="{{basePath}}page/{{ addInt $currPageNo -1 }}?q={{.q}}">
+      <i class="iconfont icon-left"></i>
+      <span class="prev-text">上一页</span>
+    </a>
+  {{end}}
+  {{if lt $currPageNo $selectList.Page.PageCount}}
+  <a class="next" href="{{basePath}}page/{{ addInt $currPageNo 1 }}?q={{.q}}">
+      <span class="next-text">下一页</span>
+      <i class="iconfont icon-right"></i>
+    </a>
+    {{end}}   
+</nav>
+        
+
+  {{template "bodyend.html" }}
