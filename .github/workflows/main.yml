@@ -10,7 +10,14 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         arch: [arm64, x64]
+
+      fail-fast: false
     steps:
+
+      - name: Print OS
+        run: | 
+          echo "Operating System: ${{ runner.os }};CPU Architecture: $(uname -m)"
+
       - name: Checkout
         uses: actions/checkout@v4
         with: 
