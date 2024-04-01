@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux]
-        goarch: [amd64]
+        goos: [windows, linux, darwin]
+        goarch: [amd64, arm64]
         exclude:
         - goarch: arm64
           goos: windows
@@ -54,6 +54,7 @@ jobs:
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
             mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}} ./build/temp/gpress/gpress
+            #chmod 777 ./build/temp/gpress/gpress
           fi
 
           if [ "${{ matrix.goos }}" == "linux" ]; then
@@ -65,6 +66,7 @@ jobs:
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
             mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}} ./build/temp/gpress/gpress
+            #chmod 777 ./build/temp/gpress/gpress
           fi
 
           if [ "${{ matrix.goos }}" == "windows" ]; then
@@ -75,9 +77,8 @@ jobs:
           fi          
           
           mv ./gpressdatadir ./build/temp/gpress/
-          zip -r gpress.zip ./build/temp
-          mv gpress.zip ./build/temp/
-          
+
+          cd ./build/temp && zip -r gpress.zip ./gpress
 
       - name: Upload
         uses: actions/upload-artifact@v4
