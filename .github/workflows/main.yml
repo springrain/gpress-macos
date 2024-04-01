@@ -21,7 +21,7 @@ jobs:
           submodules: recursive
 
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: '1.22.1'
 
@@ -53,7 +53,7 @@ jobs:
           mv ./gpressdatadir ./temp/gpress/
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: gpress-${{ matrix.os }}-${{ matrix.arch }}
           path: ${{ github.workspace }}/temp
