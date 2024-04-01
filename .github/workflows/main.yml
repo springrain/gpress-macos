@@ -5,13 +5,20 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
-        arch: [arm64, x64]
-
+        # Include amd64 on all platforms.
+        goos: [windows, linux, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+            goos: windows
       fail-fast: false
+    env:
+      GOOS: ${{ matrix.goos }}
+      GOARCH: ${{ matrix.goarch }}
+
     steps:
 
       - name: Print OS
@@ -23,19 +30,37 @@ jobs:
         with: 
           submodules: recursive
 
-      - name: Install Go
-        uses: actions/setup-go@v5
+      - name: Build
+        uses: crazy-max/ghaction-xgo@v3
         with:
-          go-version: '1.22.1'
+          xgo_version: latest
+          go_version: 1.22.1
+          dest: build/gpress
+          prefix: gpress
+          targets: ${{matrix.goos}}/${{matrix.goarch}}
+          v: true
+          x: false
+          race: false
+          ldflags: -w -s
+          tags: fts5
+          buildmode: default
+          trimpath: true
+      - name: Rename executable file
+        run: |
+          cd ./build/gpress || exit 1
+          mv gpress-$GOOS-$GOARCH* gpress
+
+      - name: Rename Windows ecutable file 
+        if: matrix.goos == 'windows'
+        run: |
+          cd ./build/gpress || exit 1
+          mv gpress gpress.exe   
 
       - name: Build project
         run: |
-          go version
-          go build --tags "fts5" -ldflags "-w -s"
-          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
-          mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
-
-          if [ "${{ matrix.os }}" == "macos-latest" ]; then
+          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..    
+          
+          if [ "${{ matrix.os }}" == "darwin" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
               mv ./gpressdatadir/fts5/libsimple.dylib ./gpressdatadir/fts5/temp.dylib
             else
@@ -43,7 +68,9 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
-          else
+          fi
+
+          if [ "${{ matrix.os }}" == "linux" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
               mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
             else
@@ -52,13 +79,19 @@ jobs:
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
           fi
+
+          if [ "${{ matrix.os }}" == "windows" ]; then
+            mv ./gpressdatadir/fts5/libsimple.dll ./gpressdatadir/fts5/temp.dll
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dll ./gpressdatadir/fts5/libsimple.dll
+          fi          
           
-          mv ./gpressdatadir ./temp/gpress/
+          mv ./gpressdatadir ./build/gpress/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: gpress-${{ matrix.os }}-${{ matrix.arch }}
-          path: ${{ github.workspace }}/temp
+          name: gpress-${{matrix.goos}}-${{matrix.goarch}}
+          path: ${{ github.workspace }}/build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
