@@ -8,23 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # Include amd64 on all platforms.
         goos: [windows, linux, darwin]
         goarch: [amd64, arm64]
         exclude:
-          - goarch: arm64
-            goos: windows
+        - goarch: arm64
+          goos: windows
       fail-fast: false
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
 
     steps:
-
-      - name: Print OS
-        run: | 
-          echo "Operating System: ${{ runner.os }};CPU Architecture: $(uname -m)"
-
       - name: Checkout
         uses: actions/checkout@v4
         with: 
