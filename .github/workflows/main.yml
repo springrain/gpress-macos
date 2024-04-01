@@ -46,7 +46,7 @@ jobs:
           buildmode: default
           trimpath: true
 
-      - name: Package project
+      - name: Package
         run: |
           mkdir -p ./build/temp/gpress/
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..    
@@ -83,7 +83,7 @@ jobs:
           mv ./gpressdatadir ./build/temp/gpress/
           
 
-      - name: Upload artifacts
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: gpress-${{matrix.goos}}-${{matrix.goarch}}
