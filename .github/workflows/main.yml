@@ -87,6 +87,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gpress-${{matrix.goos}}-${{matrix.goarch}}
-          path: ${{ github.workspace }}/build
+          path: ${{ github.workspace }}/build/temp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
