@@ -35,9 +35,6 @@ jobs:
         with:
           xgo_version: latest
           go_version: 1.22.1
-          dest: build/gpress
-          prefix: gpress
-          targets: ${{matrix.goos}}/${{matrix.goarch}}
           v: true
           x: false
           race: false
@@ -45,19 +42,10 @@ jobs:
           tags: fts5
           buildmode: default
           trimpath: true
-      - name: Rename executable file
-        run: |
-          cd ./build/gpress || exit 1
-          mv gpress-$GOOS-$GOARCH* gpress
-
-      - name: Rename Windows ecutable file 
-        if: matrix.goos == 'windows'
-        run: |
-          cd ./build/gpress || exit 1
-          mv gpress gpress.exe   
 
       - name: Build project
         run: |
+          mkdir -p ./build/gpress/
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..    
           
           if [ "${{ matrix.os }}" == "darwin" ]; then
@@ -68,6 +56,7 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
+            mv ./gpress ./build/gpress/
           fi
 
           if [ "${{ matrix.os }}" == "linux" ]; then
@@ -78,12 +67,14 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
+            mv ./gpress ./build/gpress/
           fi
 
           if [ "${{ matrix.os }}" == "windows" ]; then
             mv ./gpressdatadir/fts5/libsimple.dll ./gpressdatadir/fts5/temp.dll
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dll ./gpressdatadir/fts5/libsimple.dll
+            mv ./gpress.exe ./build/gpress/
           fi          
           
           mv ./gpressdatadir ./build/gpress/
