@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         goos: [ linux]
@@ -54,6 +54,7 @@ jobs:
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
             mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}} ./build/temp/gpress/gpress
+            chmod 777 ./build/temp/gpress/gpress
           fi
 
           if [ "${{ matrix.goos }}" == "linux" ]; then
@@ -65,6 +66,7 @@ jobs:
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
             mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}} ./build/temp/gpress/gpress
+            chmod 777 ./build/temp/gpress/gpress
           fi
 
           if [ "${{ matrix.goos }}" == "windows" ]; then
