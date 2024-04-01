@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [windows, linux, darwin]
+        goos: [windows, darwin]
         goarch: [amd64, arm64]
         exclude:
         - goarch: arm64
@@ -75,12 +75,14 @@ jobs:
           fi          
           
           mv ./gpressdatadir ./build/temp/gpress/
+          zip -r gpress.zip ./build/temp
+          mv gpress.zip ./build/temp/
           
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
           name: gpress-${{matrix.goos}}-${{matrix.goarch}}
-          path: ${{ github.workspace }}/build/temp
+          path: ${{ github.workspace }}/build/temp/gpress.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
