@@ -51,7 +51,7 @@ jobs:
           mkdir -p ./build/temp/gpress/
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..    
           
-          if [ "${{ matrix.os }}" == "darwin" ]; then
+          if [ "${{ matrix.goos }}" == "darwin" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
               mv ./gpressdatadir/fts5/libsimple.dylib ./gpressdatadir/fts5/temp.dylib
             else
@@ -59,10 +59,10 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
-            mv ./build/gpress-$GOOS-$GOARCH ./build/temp/gpress/gpress
+            mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}} ./build/temp/gpress/gpress
           fi
 
-          if [ "${{ matrix.os }}" == "linux" ]; then
+          if [ "${{ matrix.goos }}" == "linux" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
               mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
             else
@@ -70,14 +70,14 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
-            mv ./build/gpress-$GOOS-$GOARCH ./build/temp/gpress/gpress
+            mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}} ./build/temp/gpress/gpress
           fi
 
-          if [ "${{ matrix.os }}" == "windows" ]; then
+          if [ "${{ matrix.goos }}" == "windows" ]; then
             mv ./gpressdatadir/fts5/libsimple.dll ./gpressdatadir/fts5/temp.dll
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dll ./gpressdatadir/fts5/libsimple.dll
-            mv ./build/gpress-$GOOS-$GOARCH.exe ./build/temp/gpress/gpress.exe
+            mv ./build/gpress-${{matrix.goos}}-${{matrix.goarch}}.exe ./build/temp/gpress/gpress.exe
           fi          
           
           mv ./gpressdatadir ./build/temp/gpress/
@@ -87,6 +87,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gpress-${{matrix.goos}}-${{matrix.goarch}}
-          path: ${{ github.workspace }}/build/temp
+          path: ${{ github.workspace }}/build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
