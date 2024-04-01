@@ -16,7 +16,7 @@ jobs:
 
       - name: Print OS
         run: | 
-          echo "Operating System: ${{ runner.os }};CPU Architecture: $(uname -m)"
+          echo "Operating System: ${{ runner.os }};CPU Architecture: $(uname -m);${{ runner.architecture }}"
 
       - name: Checkout
         uses: actions/checkout@v4
