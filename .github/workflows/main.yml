@@ -5,11 +5,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
-        goos: [windows, linux, darwin]
-        goarch: [amd64, arm64]
+        goos: [ linux]
+        goarch: [amd64]
         exclude:
         - goarch: arm64
           goos: windows
