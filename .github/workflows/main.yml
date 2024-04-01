@@ -113,7 +113,7 @@ jobs:
           go version
           
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
-          mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
+         
 
           if [ "${{ matrix.arch }}" == "arm64" ]; then
             mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
@@ -125,6 +125,7 @@ jobs:
           fi
           rm -rf ./gpressdatadir/fts5/libsimple*
           mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
+          mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
           mv ./gpressdatadir ./temp/gpress/
           cd ./temp && zip -r gpress.zip ./gpress
 
