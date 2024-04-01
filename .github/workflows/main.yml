@@ -1,14 +1,15 @@
 name: CI
-### 手动触发,目前Linux编译暂时不能使用,需要手动编译
+### 手动触发,目前Linux编译存在问题
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  MacOS:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [windows, linux, darwin]
+        #goos: [linux,windows,darwin]
+        goos: [windows,darwin]
         goarch: [amd64, arm64]
         exclude:
         - goarch: arm64
@@ -85,5 +86,52 @@ jobs:
         with:
           name: gpress-${{matrix.goos}}-${{matrix.goarch}}
           path: ${{ github.workspace }}/build/temp/gpress.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  Linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        arch: [arm64, x64]
+
+      fail-fast: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: 
+          submodules: recursive
+
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.1'
+
+      - name: Build
+        run: |
+          go version
+          
+          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
+          mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
+
+          if [ "${{ matrix.arch }}" == "arm64" ]; then
+            mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
+            #GOOS=linux GOARCH=arm64 go build --tags "fts5" -ldflags "-w -s"
+            go build --tags "fts5" -ldflags "-w -s"
+          else
+            mv ./gpressdatadir/fts5/libsimple.so ./gpressdatadir/fts5/temp.so
+            go build --tags "fts5" -ldflags "-w -s"
+          fi
+          rm -rf ./gpressdatadir/fts5/libsimple*
+          mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
+          mv ./gpressdatadir ./temp/gpress/
+          cd ./temp && zip -r gpress.zip ./gpress
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpress-linux-${{ matrix.arch }}
+          path: ${{ github.workspace }}/temp/gpress.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
