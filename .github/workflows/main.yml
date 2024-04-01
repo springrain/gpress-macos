@@ -38,6 +38,7 @@ jobs:
           v: true
           x: false
           race: false
+          prefix: gpress
           dest: build
           ldflags: -w -s
           tags: fts5
@@ -47,7 +48,7 @@ jobs:
 
       - name: Package project
         run: |
-          mkdir -p ./build/gpress/
+          mkdir -p ./build/temp/gpress/
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..    
           
           if [ "${{ matrix.os }}" == "darwin" ]; then
@@ -58,7 +59,7 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
-            mv ./gpress ./build/gpress/
+            mv ./build/gpress-$GOOS-$GOARCH ./build/temp/gpress/gpress
           fi
 
           if [ "${{ matrix.os }}" == "linux" ]; then
@@ -69,22 +70,23 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
-            mv ./gpress ./build/gpress/
+            mv ./build/gpress-$GOOS-$GOARCH ./build/temp/gpress/gpress
           fi
 
           if [ "${{ matrix.os }}" == "windows" ]; then
             mv ./gpressdatadir/fts5/libsimple.dll ./gpressdatadir/fts5/temp.dll
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dll ./gpressdatadir/fts5/libsimple.dll
-            mv ./gpress.exe ./build/gpress/
+            mv ./build/gpress-$GOOS-$GOARCH.exe ./build/temp/gpress/gpress.exe
           fi          
           
-          mv ./gpressdatadir ./build/gpress/
+          mv ./gpressdatadir ./build/temp/gpress/
+          
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: gpress-${{matrix.goos}}-${{matrix.goarch}}
-          path: ${{ github.workspace }}/build
+          path: ${{ github.workspace }}/build/temp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
