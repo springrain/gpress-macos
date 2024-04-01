@@ -8,9 +8,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
         arch: [arm64, x64]
-
+        exclude:
+        - os: windows-latest
+          arch: arm64
       fail-fast: false
     steps:
 
@@ -38,7 +40,9 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
-          else
+          fi   
+
+          if [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
             if [ "${{ matrix.arch }}" == "arm64" ]; then
               mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
               GOOS=linux GOARCH=arm64 go build --tags "fts5" -ldflags "-w -s"
@@ -48,6 +52,14 @@ jobs:
             fi
             rm -rf ./gpressdatadir/fts5/libsimple*
             mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
+          fi
+
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            mv ./gpressdatadir/fts5/libsimple.dll ./gpressdatadir/fts5/temp.dll
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dll ./gpressdatadir/fts5/libsimple.dll
+            
+            go build --tags "fts5" -ldflags "-w -s"
           fi
 
           mkdir -p ./temp/gpress && mv ./gpress ./temp/gpress/ 
