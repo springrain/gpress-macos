@@ -5,10 +5,10 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [osx, linux]
+        os: [macos-latest, ubuntu-latest]
         arch: [arm64, x64]
 
       fail-fast: false
@@ -16,7 +16,7 @@ jobs:
 
       - name: Print OS
         run: | 
-          echo "Operating System: ${{ runner.os }};CPU Architecture: $(uname -m);${{ runner.architecture }}"
+          echo "Operating System: ${{ runner.os }};CPU Architecture: $(uname -m)"
 
       - name: Checkout
         uses: actions/checkout@v4
