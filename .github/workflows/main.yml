@@ -113,12 +113,11 @@ jobs:
           go version
           
           cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
-         
 
           if [ "${{ matrix.arch }}" == "arm64" ]; then
             mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
-            #GOOS=linux GOARCH=arm64 go build --tags "fts5" -ldflags "-w -s"
-            go build --tags "fts5" -ldflags "-w -s"
+            GOOS=linux GOARCH=arm64 go build --tags "fts5" -ldflags "-w -s"
+            #go build --tags "fts5" -ldflags "-w -s"
           else
             mv ./gpressdatadir/fts5/libsimple.so ./gpressdatadir/fts5/temp.so
             go build --tags "fts5" -ldflags "-w -s"
