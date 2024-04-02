@@ -20,7 +20,7 @@ jobs:
      
 
       - name: Build
-        uses: goreleaser/v-action@v5
+        uses: goreleaser/goreleaser-action@v5
         with:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
