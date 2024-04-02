@@ -1,0 +1,78 @@
+name: release
+### 手动触发,目前Linux glibc版本不兼容,需要手动编译.两层压缩包
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: 
+          submodules: recursive
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22.1'
+
+      - name: Build
+        uses: goreleaser/v-action@v5
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          # 'latest', 'nightly', or a semver
+          version: latest
+          args: release --clean --tags "fts5" -ldflags "-w -s"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        
+
+      - name: Package
+        run: |
+          mkdir -p ./temp/gpress/
+          cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..    
+          
+          if [ "${{ matrix.goos }}" == "darwin" ]; then
+            if [ "${{ matrix.arch }}" == "arm64" ]; then
+              mv ./gpressdatadir/fts5/libsimple.dylib ./gpressdatadir/fts5/temp.dylib
+            else
+              mv ./gpressdatadir/fts5/libsimple.dylib-amd64 ./gpressdatadir/fts5/temp.dylib
+            fi
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dylib ./gpressdatadir/fts5/libsimple.dylib
+            #mv ./gpress-${{matrix.goos}}-${{matrix.goarch}} ./temp/gpress/gpress
+            mv ./gpress ./temp/gpress/
+          fi
+
+          if [ "${{ matrix.goos }}" == "linux" ]; then
+            if [ "${{ matrix.arch }}" == "arm64" ]; then
+              mv ./gpressdatadir/fts5/libsimple.so-aarch64 ./gpressdatadir/fts5/temp.so
+            else
+              mv ./gpressdatadir/fts5/libsimple.so ./gpressdatadir/fts5/temp.so
+            fi
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.so ./gpressdatadir/fts5/libsimple.so
+            #mv ./gpress-${{matrix.goos}}-${{matrix.goarch}} ./temp/gpress/gpress
+            mv ./gpress ./temp/gpress/
+          fi
+
+          if [ "${{ matrix.goos }}" == "windows" ]; then
+            mv ./gpressdatadir/fts5/libsimple.dll ./gpressdatadir/fts5/temp.dll
+            rm -rf ./gpressdatadir/fts5/libsimple*
+            mv ./gpressdatadir/fts5/temp.dll ./gpressdatadir/fts5/libsimple.dll
+            #mv ./gpress-${{matrix.goos}}-${{matrix.goarch}}.exe ./temp/gpress/gpress.exe
+            mv ./gpress.exe ./temp/gpress/
+          fi          
+          
+          mv ./gpressdatadir ./temp/gpress/
+          cd ./temp && zip -r gpress.zip ./gpress
+          
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpress-${{matrix.goos}}-${{matrix.goarch}}
+          path: ${{ github.workspace }}/temp/gpress.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
