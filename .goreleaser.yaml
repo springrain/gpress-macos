@@ -1,3 +1,7 @@
+# goreleaser.yml
+
+
+
 builds:
   - binary: gpress
     goos:
@@ -7,6 +11,33 @@ builds:
     goarch:
       - amd64
       - arm64
+    exclude:
+      - goos: windows
+        goarch: arm64
     tags:
       - fts5
     ldflags: -s -w
+
+after:
+  hooks:
+    
+    - cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
+    - |
+      mkdir -p ./temp/gpress-darwin-arm64/gpress/
+      mkdir -p ./temp/gpress-darwin-amd64/gpress/
+      mkdir -p ./temp/gpress-linux-arm64/gpress/
+      mkdir -p ./temp/gpress-linux-amd64/gpress/
+      mkdir -p ./temp/gpress-windows-amd64/gpress/
+      cp -rf ./gpressdatadir dist/gpress-macos_darwin_arm64/gpress ./temp/gpress-darwin-arm64/gpress/
+      cp -rf ./gpressdatadir dist/gpress-macos_darwin_amd64/gpress ./temp/gpress-darwin-amd64/gpress/
+      cp -rf ./gpressdatadir dist/gpress-macos_linux_arm64/gpress ./temp/gpress-linux-arm64/gpress/
+      cp -rf ./gpressdatadir dist/gpress-macos_linux_arm64/gpress ./temp/gpress-linux-arm64/gpress/
+      cp -rf ./gpressdatadir dist/gpress-macos_windows_amd64/gpress.exe ./temp/gpress-windows-amd64/gpress/
+      
+      rm -rf ./temp/gpress-darwin-arm64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.dylib ./temp/gpress-darwin-arm64/gpress/gpressdatadir/fts5/libsimple.dylib
+      rm -rf ./temp/gpress-darwin-amd64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.dylib-amd64 ./temp/gpress-darwin-amd64/gpress/gpressdatadir/fts5/libsimple.dylib
+      rm -rf ./temp/gpress-linux-arm64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.so-aarch64 ./temp/gpress-linux-arm64/gpress/gpressdatadir/fts5/libsimple.so
+      rm -rf ./temp/gpress-linux-amd64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.so ./temp/gpress-linux-amd64/gpress/gpressdatadir/fts5/libsimple.so
+      rm -rf ./temp/gpress-windows-amd64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.dll ./temp/gpress-windows-amd64/gpress/gpressdatadir/fts5/libsimple.dll
+
+      
