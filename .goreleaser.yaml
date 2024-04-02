@@ -11,7 +11,7 @@ builds:
     goarch:
       - amd64
       - arm64
-    exclude:
+    ignore:
       - goos: windows
         goarch: arm64
     tags:
@@ -20,9 +20,8 @@ builds:
 
 after:
   hooks:
-    
-    - cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
     - |
+      cd ./gpressdatadir && unzip dict.zip && rm -rf ./dict.zip && cd ..
       mkdir -p ./temp/gpress-darwin-arm64/gpress/
       mkdir -p ./temp/gpress-darwin-amd64/gpress/
       mkdir -p ./temp/gpress-linux-arm64/gpress/
@@ -40,4 +39,3 @@ after:
       rm -rf ./temp/gpress-linux-amd64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.so ./temp/gpress-linux-amd64/gpress/gpressdatadir/fts5/libsimple.so
       rm -rf ./temp/gpress-windows-amd64/gpress/gpressdatadir/fts5/* && cp -rf ./gpressdatadir/fts5/libsimple.dll ./temp/gpress-windows-amd64/gpress/gpressdatadir/fts5/libsimple.dll
 
-      

@@ -18,10 +18,6 @@ jobs:
         with:
           go-version: '1.22.1'
 
-      - name: CreateDir
-        run: |
-          mkdir -p ./temp/gpress/     
-
       - name: Build
         uses: goreleaser/goreleaser-action@v5
         with:
