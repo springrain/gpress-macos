@@ -30,6 +30,6 @@ jobs:
           # 'latest', 'nightly', or a semver
           version: latest
           workdir: ./temp/gpress/
-          args: release --clean --tags "fts5" -ldflags "-w -s"
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
