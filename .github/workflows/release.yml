@@ -30,6 +30,6 @@ jobs:
           # 'latest', 'nightly', or a semver
           version: latest
           workdir: ./temp/gpress/
-          args: release --clean
+          args: release --clean --snapshot
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}   
