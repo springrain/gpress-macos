@@ -1,40 +1,68 @@
-<img src="gpressdatadir/public/gpress-logo.png" height="150px" />
+# gpress帮助文档
 
-## 介绍  
+## 简介
 Web3内容平台,Hertz + Go template + FTS5全文检索,支持以太坊和百度超级链,兼容hugo生态,使用Wasm扩展插件,只需200M内存  
-    
-**作为静态站点：** gpress生成的静态文件和Hugo一致,也可以简单认为gpress是Hugo的后台管理,兼容Hugo主题生态,已迁移多款Hugo主题:[even](gitee.com/gpress/gpress/tree/master/gpressdatadir/template/theme/default)、[doks](gitee.com/gpress/gpress-doks)、[book](gitee.com/gpress/gpress-book)、[geekdoc](gitee.com/gpress/gpress-geekdoc)......   
-**作为动态站点：** gpress功能简单,只有7个菜单,5张表,5000行代码,使用SQLite,一键启动,只需200M内存,支持全文检索......  
-**作为Web3：** gpress已支持以太坊和百度超级链账户体系,会基于Wasm持续迭代去中心功能,让数据自由一点点......  
-**作为后浪：** 相对于Hugo、WordPress等优秀的内容平台,gpress还有很多不足,功能简单而又稚嫩......  
-**帮助文档：** [点击查看帮助文档](./gpressdatadir/public/doc/index.md)   
- 
-个人博客 [jiagou.com](jiagou.com/post/about) 使用gpress搭建,搜索和后台管理是动态,其他是静态页面.  
-<img src="gpressdatadir/public/index.png" width="600px">
 
-## 开发环境  
-gprss使用了 ```https://github.com/wangfenjin/simple``` 作为FTS5的全文检索扩展,编译好的libsimple文件放到 ```gpressdatadir/fts5``` 目录下,如果gpress启动报错连不上数据库,请检查libsimple文件是否正确,如果需要重新编译libsimple,请参考 https://github.com/wangfenjin/simple.  
+## 安装
+运行gpress,会输出访问的路径,根据提示使用浏览器访问 ```http://127.0.0.1:660/admin/login``` 首次运行会进入安装界面.  
+<img src="image/000.png" width="600px">  
+首次运行gpress,一定要先进行安装设置管理员的账号密码.安装界面如下图:
+<img src="image/001.png" width="600px">  
+输入管理员账号和密码,即完成安装,同时支持区块链账号Address作为管理员用户
+<img src="image/002.png" width="600px">  
+目前支持以太坊和百度超级链,推荐使用[X-Pocket钱包](https://github.com/shengjian-tech/X-Pocket)  
+<img src="image/003.png" width="600px">  
 
-默认端口660,后台管理地址 http://127.0.0.1:660/admin/login    
-需要先解压```gpressdatadir/dict.zip```      
-运行 ```go run --tags "fts5" .```     
-打包: ```go build --tags "fts5" -ldflags "-w -s"```  
+## 登录
+浏览器访问 ```http://127.0.0.1:660/admin/login```,正常显示登录页面,输入安装时设置的账号密码.
+<img src="image/004.png" width="600px">  
+同时支持使用区块链钱包进行授权登录  
+<img src="image/005.png" width="600px">  
 
-开发环境需要配置CGO编译,设置```set CGO_ENABLED=1```,下载[mingw64](https://github.com/niXman/mingw-builds-binaries/releases)和[cmake](https://cmake.org/download/),并把bin配置到环境变量,注意把```mingw64/bin/mingw32-make.exe``` 改名为 ```make.exe```  
-注意修改vscode的launch.json,增加 ``` ,"buildFlags": "--tags=fts5" ``` 用于调试fts5    
-test需要手动测试:``` go test -timeout 30s --tags "fts5"  -run ^TestReadmks$ gitee.com/gpress/gpress ```  
-打包: ``` go build --tags "fts5" -ldflags "-w -s" ```   
-重新编译simple时,建议使用```https://github.com/wangfenjin/simple```编译好的.  
-注意修改widnows编译脚本,去掉 mingw64 编译依赖的```libgcc_s_seh-1.dll```和```libstdc++-6.dll```,同时关闭```BUILD_TEST_EXAMPLE```,有冲突
-```bat
-rmdir /q /s build
-mkdir build && cd build
-cmake .. -G "Unix Makefiles" -DBUILD_TEST_EXAMPLE=OFF -DCMAKE_INSTALL_PREFIX=release -DCMAKE_CXX_FLAGS="-static-libgcc -static-libstdc++" -DCMAKE_EXE_LINKER_FLAGS="-Wl,-Bstatic -lstdc++ -lpthread -Wl,-Bdynamic"
-make && make install
-```
+## 内容导航
+登录之后,默认查看内容导航功能,左侧是导航菜单,右侧是文章内容  
+<img src="image/006.png" width="600px">  
+新增一级导航,就是新增上级为空的导航,会跳转到新增导航界面.  
+选中导航,字体颜色为蓝色,右侧显示改导航下的内容,如下图示例,选中```BlockChain```导航   
+<img src="image/007.png" width="600px">  
+导航后面有功能提示的图标,鼠标悬浮显示功能菜单.  
+<img src="image/008.png" width="600px">  
+有以下四个功能:
+- 新增内容:为该导航新增文章内容
+- 新增子导航:在该导航下新增子导航
+- 编辑导航: 编辑该导航
+- 删除导航: 删除该导航  
+新增子导航的功能界面如下:    
+<img src="image/009.png" width="600px">        
+编辑导航的功能界面如下:      
+<img src="image/010.png" width="600px">      
+删除导航的功能界面如下:      
+<img src="image/011.png" width="600px">      
 
-## 静态化
-后台 ```刷新站点``` 功能会生成静态html文件到 ```statichtml``` 目录,同时生成```gzip_static```文件,需要把正在使用的主题的 ```css,js,image```和```gpressdatadir/public```目录复制到 ```statichtml```目录下,也可以用Nginx反向代理指定目录.    
+## 新增/修改内容
+内容管理是gpress的重要功能,新增内容主要设置内容的ID,标题和归属的导航菜单,ID会出现在URL中,且不可更改,例如 ID为```about```,访问路径为```http://127.0.0.1:660/post/about```.内容有```Markdown```和```富文本```两种格式,根据场景选择使用.
+<img src="image/012.png" width="600px">
+## 内容列表
+界面左侧为内容列表,点击```ID```会跳转到前台界面,操作有```预览```,```编辑```和```删除```.```预览```是管理员查看实时数据,通过```ID```跳转的前台界面可能有静态化缓存.
+内容列表有基于```fts5```实现的全文检索功能,输入关键字,点击搜索图标,完成搜索.  
+<img src="image/013.png" width="600px">  
+## 站点信息
+设置站点的基础内容信息,其中主题是读取```gpressdatadir/template/theme```目录下的主题文件夹,更换主题之后,需要点击```刷新站点```功能,刷新前台界面. ```logo```是前台界面显示的logo,后台的logo固定为```gpress```的logo,暂时不支持更改. 
+<img src="image/014.png" width="600px">  
+## 用户信息
+修改管理员的账号信息,功能界面如下:  
+<img src="image/015.png" width="600px">
+## 主题模板
+主题模板的增删改查功能,管理主题中的自定义模板文件,修改内容和栏目时,可以应用自定义的模板文件.  
+<img src="image/016.png" width="600px">  
+支持上传主题zip压缩包,用于新增主题.   
+<img src="image/017.png" width="600px">  
+可以从```主题市场```中下载主题,进行安装  
+<img src="image/018.png" width="600px">  
+
+## 刷新站点
+模板更改时需要刷新站点才能生效,同时刷新站点会生成静态文件,用于```Nginx```静态化访问.
+```刷新站点``` 功能会生成静态html文件到 ```statichtml``` 目录,同时生成```gzip_static```文件,需要把正在使用的主题的 ```css,js,image```和```gpressdatadir/public```目录复制到 ```statichtml```目录下,也可以用Nginx反向代理指定目录.    
 nginx 配置示例如下:
 ```conf
 ### 当前在用主题(default)的css文件
@@ -100,10 +128,16 @@ location / {
 }
 
 ```  
-## 阿里云计算巢
-[点击部署gpress到阿里云计算巢](https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&ServiceId=service-d4000c9b22c54e5cbffe),也可以独立购买阿里云的服务器,进行部署.选择```张家口机房```最低配置的 ```ecs.t6-c4m1.large``` 规格```2核CPU 0.5G内存 20G高效云盘 RockyLinux9 按使用流量-带宽峰值80M```就够用了,一年100元左右,性价比高.  
+<img src="image/019.png" width="600px">    
 
-## 表结构  
+## 设置
+用于系统设置,需要重启gpress才能生效.  
+<img src="image/020.png" width="600px">    
+
+## 退出
+退出管理后台
+
+## 功能/表字段说明
 ID默认使用时间戳(23位)+随机数(9位),全局唯一.  
 建表语句```gpressdatadir/gpress.sql```          
 
@@ -206,4 +240,5 @@ ID默认使用时间戳(23位)+随机数(9位),全局唯一.
 | createUser  | string      | 创建人       | -       |  初始化 system          |
 | sortNo      | int         | 排序         | -       |  正序                   |
 | status      | int         | 状态     | -       |  链接访问(0),公开(1),私密(2)  |
+
 

@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/hex"
 	"net/http"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -97,7 +98,7 @@ func init() {
 		sha3Bytes := sha3.Sum512([]byte(user.Password))
 		user.Password = hex.EncodeToString(sha3Bytes[:])
 
-		loginHtml := "admin/login"
+		loginHtml := "admin/login?message=恭喜您,成功安装gpress,现在请登录"
 		if user.ChainAddress != "" && user.ChainType != "" { //如果使用了address作为登录方式
 			user.Account = ""
 			user.UserName = ""
@@ -295,6 +296,38 @@ func init() {
 		c.JSON(http.StatusOK, ResponseData{StatusCode: 1, Data: funcBasePath() + path})
 	})
 
+	//上传主题文件
+	adminGroup.POST("/themeTemplate/uploadTheme", func(ctx context.Context, c *app.RequestContext) {
+		fileHeader, err := c.FormFile("file")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0, ERR: err})
+			c.Abort() // 终止后续调用
+			return
+		}
+		ext := filepath.Ext(fileHeader.Filename)
+		if ext != ".zip" { //不是zip
+			c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0, ERR: err})
+			c.Abort() // 终止后续调用
+			return
+		}
+		path := themeDir + fileHeader.Filename
+		err = c.SaveUploadedFile(fileHeader, path)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0, ERR: err})
+			c.Abort() // 终止后续调用
+			return
+		}
+		//解压压缩包
+		err = unzip(path, themeDir)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0, ERR: err})
+			c.Abort() // 终止后续调用
+			return
+		}
+		os.Remove(path)
+		c.JSON(http.StatusOK, ResponseData{StatusCode: 1, Data: funcBasePath() + path})
+	})
+
 	// 内容预览
 	adminGroup.GET("/content/look", funcContentPreview)
 	// 栏目预览
@@ -302,6 +335,12 @@ func init() {
 
 	// 查询Content列表,根据CategoryId like
 	adminGroup.GET("/content/list", funcContentList)
+
+	// 查询主题模板
+	adminGroup.GET("/themeTemplate/list", funcThemeTemplateList)
+
+	// 修改主题模板文件
+	adminGroup.POST("/themeTemplate/update", funcThemeTemplatePost)
 
 	// 通用list列表,先都使用get方法
 	adminGroup.GET("/:urlPathParam/list", funcList)
@@ -459,6 +498,106 @@ func funcContentList(ctx context.Context, c *app.RequestContext) {
 	c.HTML(http.StatusOK, listFile, responseData)
 }
 
+// funcThemeTemplateList 所有的主题文件列表
+func funcThemeTemplateList(ctx context.Context, c *app.RequestContext) {
+	urlPathParam := "themeTemplate"
+	var responseData ResponseData
+	extMap := make(map[string]interface{})
+	extMap["file"] = ""
+	responseData.ExtMap = extMap
+	list := make([]ThemeTemplate, 0)
+
+	//遍历当前使用的模板文件夹
+	err := filepath.Walk(themeDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 分隔符统一为 / 斜杠
+		path = filepath.ToSlash(path)
+		path = path[strings.Index(path, themeDir)+len(themeDir):]
+		if path == "" {
+			return err
+		}
+		//获取文件后缀
+		ext := filepath.Ext(path)
+		ext = strings.ToLower(ext)
+		pid := filepath.ToSlash(filepath.Dir(path))
+		if pid == "." {
+			pid = ""
+		}
+
+		themeTemplate := ThemeTemplate{}
+		themeTemplate.FilePath = path
+		themeTemplate.Pid = pid
+		themeTemplate.Id = path
+		themeTemplate.FileSuffix = ext
+		themeTemplate.Name = info.Name()
+		if info.IsDir() {
+			themeTemplate.FileType = "dir"
+		} else {
+			themeTemplate.FileType = "file"
+		}
+		list = append(list, themeTemplate)
+		return nil
+	})
+
+	responseData.UrlPathParam = urlPathParam
+	responseData.Data = list
+	responseData.ERR = err
+	//优先使用自定义模板文件
+	listFile := "admin/" + urlPathParam + "/list.html"
+
+	filePath := c.Query("file")
+	if filePath == "" || strings.Contains(filePath, "..") {
+		c.HTML(http.StatusOK, listFile, responseData)
+		return
+	}
+	filePath = filepath.ToSlash(filePath)
+	fileContent, err := os.ReadFile(themeDir + filePath)
+	if err != nil {
+		responseData.ERR = err
+		c.HTML(http.StatusOK, listFile, responseData)
+		return
+	}
+	responseData.ExtMap["file"] = string(fileContent)
+	c.HTML(http.StatusOK, listFile, responseData)
+}
+
+func funcThemeTemplatePost(ctx context.Context, c *app.RequestContext) {
+	themeTemplate := ThemeTemplate{}
+	c.Bind(&themeTemplate)
+	filePath := filepath.ToSlash(themeTemplate.FilePath)
+	if filePath == "" || strings.Contains(filePath, "..") {
+		c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0})
+		c.Abort() // 终止后续调用
+		return
+	}
+	if !pathExist(themeDir + filePath) {
+		c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0})
+		c.Abort() // 终止后续调用
+		return
+	}
+
+	//打开文件
+	file, err := os.OpenFile(themeDir+filePath, os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0})
+		c.Abort() // 终止后续调用
+		return
+	}
+	defer file.Close() // 确保在函数结束时关闭文件
+
+	// 写入内容
+	_, err = file.WriteString(themeTemplate.FileContent)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, ResponseData{StatusCode: 0})
+		c.Abort() // 终止后续调用
+		return
+	}
+	c.JSON(http.StatusOK, ResponseData{StatusCode: 1})
+}
+
 // funcUpdatePre 修改页面
 func funcUpdatePre(ctx context.Context, c *app.RequestContext) {
 	funcTableById(ctx, c, "update.html")
@@ -497,12 +636,6 @@ func funcUpdateTable(ctx context.Context, c *app.RequestContext, urlPathParam st
 		entity = ptrObj
 	case tableSiteName:
 		ptrObj := &Site{}
-		err = c.Bind(ptrObj)
-		id = ptrObj.Id
-		ptrObj.UpdateTime = now
-		entity = ptrObj
-	case tablePageTemplateName:
-		ptrObj := &PageTemplate{}
 		err = c.Bind(ptrObj)
 		id = ptrObj.Id
 		ptrObj.UpdateTime = now
@@ -636,19 +769,6 @@ func funcSaveTable(ctx context.Context, c *app.RequestContext, urlPathParam stri
 		entity = ptrObj
 	case tableSiteName:
 		ptrObj := &Site{}
-		err = c.Bind(ptrObj)
-		if ptrObj.Id == "" {
-			ptrObj.Id = FuncGenerateStringID()
-		}
-		if ptrObj.CreateTime == "" {
-			ptrObj.CreateTime = now
-		}
-		if ptrObj.UpdateTime == "" {
-			ptrObj.UpdateTime = now
-		}
-		entity = ptrObj
-	case tablePageTemplateName:
-		ptrObj := &PageTemplate{}
 		err = c.Bind(ptrObj)
 		if ptrObj.Id == "" {
 			ptrObj.Id = FuncGenerateStringID()
