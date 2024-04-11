@@ -11,7 +11,7 @@
 {{ $themeTemplate := themeTemplate }}
 
 <div class="layui-panel" style="padding: 5px;height: 100%;">
-	<form class="layui-form" id="gpress-form" action="{{basePath}}admin/{{.UrlPathParam}}/save" method="POST" style="height:100%;display: flex;flex-direction: column;">
+	<form class="layui-form" id="gpress-form" action="{{basePath}}admin/{{.UrlPathParam}}/save" method="POST" onsubmit="return false;" style="height:100%;display: flex;flex-direction: column;">
 		<div class="layui-form-item">
 			<div class="layui-col-md3">
 				<label class="layui-form-label">ID</label>
@@ -56,7 +56,7 @@
 			<div class="layui-col-md3">
 				<label class="layui-form-label">页面模版</label>
 				<div class="layui-input-block">
-					<select name="templateID" id="templateID">
+					<select name="templateFile" id="templateFile">
 						<option value="">默认(content.html)</option>
 						{{ range $index,$obj := $themeTemplate }}
 						<option value="{{$obj.Name}}">{{$obj.Name}}</option>
@@ -126,15 +126,13 @@
 					lay-filter="gpress-form-ajax-update">提交保存</button>
 			</div>
 		</div>
-		<div class="layui-form-item" style="flex:1">
-			<div id="markdown-container" style="height: 100%;"></div>
-            <div id="editor-wrapper" style="display: none;height: 100%;">
+		<div id="markdown-container" style="height: 100%;"></div>
+        <div id="editor-wrapper" style="display: none;height: 100%;">
 			<div style="display: flex;height: 100%;overflow: auto;flex-direction: column;">
 				<div id="toolbar-container"><!-- 工具栏 --></div>
 				<div id="editor-container" style="flex:1"><!-- 编辑器 --></div>
 			</div>
-		    </div>
-		</div>
+	     </div>
 
 	</form>
 </div>
@@ -196,6 +194,8 @@
 		var cherry = new Cherry({
 			id: 'markdown-container',
 			value: '',
+			autoSave2Textarea: true,
+            defaultModel: 'edit&preview',
 			fileUpload: function (file, callback) {
 				var formdata = new FormData(); // FormData对象,来发送二进制文件.
 				formdata.append('file', file); // 将文件追加到 formdata对象中
@@ -214,22 +214,43 @@
 			toolbars: {
 				// 定义顶部工具栏
 				toolbar: [
-					'undo', 'redo', '|',
-					// 把字体样式类按钮都放在加粗按钮下面
-					{ bold: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'ruby'] },
-					'color', 'size', '|', 'header', 'list', 'panel', '|',
-					// 把插入类按钮都放在插入按钮下面
-					{ insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'drawIo'] },
-					'graph'
+				'bold',
+				'italic',
+				{
+					strikethrough: ['strikethrough', 'underline', 'sub', 'sup', 'ruby', 'customMenuAName'],
+				},
+				'size',
+				'|',
+				'color',
+				'header',
+				'|',
+				'ol',
+				'ul',
+				'checklist',
+				'panel',
+				'justify',
+				'detail',
+				'|',
+				{
+					insert: ['image', 'audio', 'video', 'link', 'hr', 'br', 'code', 'formula', 'toc', 'table', 'pdf', 'word', 'ruby'],
+				},
+                'graph','togglePreview', 'export'
 				],
 				// 定义侧边栏,默认为空
-				//sidebar: ['theme', 'mobilePreview', 'copy'],
+				// sidebar: ['theme', 'mobilePreview', 'copy'],
 				// 定义顶部右侧工具栏,默认为空
 				toolbarRight: ['fullScreen'],
+				//显示目录
+				toc: {
+				  updateLocationHash: true, // 要不要更新URL的hash
+				  defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
+				},
+				
 				// 定义选中文字时弹出的“悬浮工具栏”,默认为 ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'quote', '|', 'size', 'color']
-				bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'ruby', '|', 'color', 'size',],
+				bubble: ['bold', 'italic', 'underline', 'strikethrough', 'sub', 'sup', 'ruby', '|', 'color', 'size'],
 				// 定义光标出现在行首位置时出现的"提示工具栏",默认为 ['h1', 'h2', 'h3', '|', 'checklist', 'quote', 'table', 'code']
-				//float: ['table', 'code', 'graph'],
+				float: [],
+				autoScrollByHashAfterInit: true,
 			},
 		});
 

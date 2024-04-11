@@ -3,13 +3,13 @@
 ## 介绍  
 Web3内容平台,Hertz + Go template + FTS5全文检索,支持以太坊和百度超级链,兼容hugo生态,使用Wasm扩展插件,只需200M内存  
     
-**作为静态站点：** gpress生成的静态文件和Hugo一致,也可以简单认为gpress是Hugo的后台管理,兼容Hugo主题生态,已迁移多款Hugo主题:[even](gitee.com/gpress/gpress/tree/master/gpressdatadir/template/theme/default)、[doks](gitee.com/gpress/gpress-doks)、[book](gitee.com/gpress/gpress-book)、[geekdoc](gitee.com/gpress/gpress-geekdoc)......   
+**作为静态站点：** gpress生成的静态文件和Hugo一致,也可以简单认为gpress是Hugo的后台管理,兼容Hugo主题生态,已迁移多款Hugo主题:[even](https://gitee.com/gpress/gpress/tree/master/gpressdatadir/template/theme/default)、[doks](https://gitee.com/gpress/gpress-doks)、[book](https://gitee.com/gpress/gpress-book)、[geekdoc](https://gitee.com/gpress/gpress-geekdoc)......   
 **作为动态站点：** gpress功能简单,只有7个菜单,5张表,5000行代码,使用SQLite,一键启动,只需200M内存,支持全文检索......  
 **作为Web3：** gpress已支持以太坊和百度超级链账户体系,会基于Wasm持续迭代去中心功能,让数据自由一点点......  
 **作为后浪：** 相对于Hugo、WordPress等优秀的内容平台,gpress还有很多不足,功能简单而又稚嫩......  
 **帮助文档：** [点击查看帮助文档](./gpressdatadir/public/doc/index.md)   
  
-个人博客 [jiagou.com](jiagou.com/post/about) 使用gpress搭建,搜索和后台管理是动态,其他是静态页面.  
+个人博客 [jiagou.com](https://jiagou.com/post/about) 使用gpress搭建,搜索和后台管理是动态,其他是静态页面.  
 <img src="gpressdatadir/public/index.png" width="600px">
 
 ## 开发环境  
@@ -101,7 +101,7 @@ location / {
 
 ```  
 ## 阿里云计算巢
-[点击部署gpress到阿里云计算巢](https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&ServiceId=service-d4000c9b22c54e5cbffe),也可以独立购买阿里云的服务器,进行部署.选择```张家口机房```最低配置的 ```ecs.t6-c4m1.large``` 规格```2核CPU 0.5G内存 20G高效云盘 RockyLinux9 按使用流量-带宽峰值80M```就够用了,一年100元左右,性价比高.  
+[点击部署gpress到阿里云计算巢](https://computenest.console.aliyun.com/service/instance/create/cn-hangzhou?type=user&ServiceId=service-d4000c9b22c54e5cbffe),也可以单独购买阿里云最低配服务器,进行部署.选择```张家口机房```,规格```ecs.t6-c4m1.large```,配置```2核CPU 0.5G内存 20G高效云盘 RockyLinux9 按使用流量-带宽峰值80M```,一年100元,五年200元左右.     
 
 ## 表结构  
 ID默认使用时间戳(23位)+随机数(9位),全局唯一.  
@@ -117,7 +117,7 @@ ID默认使用时间戳(23位)+随机数(9位),全局唯一.
 | jwtSecret   | string      | jwt密钥     | 随机生成     |
 | jwttokenKey | string      | jwt的key    |  默认 jwttoken  |
 | serverPort  | string      | IP:端口     |  默认 :660  |
-| timeout     | int         | jwt超时时间秒|  默认 1800  |
+| timeout     | int         | jwt超时时间秒|  默认 7200  |
 | maxRequestBodySize| int   | 最大请求|  默认 20M  |
 | proxy       | string      | http代理地址 |             |
 | createTime  | string      | 创建时间     |  2006-01-02 15:04:05  |
@@ -172,8 +172,8 @@ ID默认使用时间戳(23位)+随机数(9位),全局唯一.
 | pid         | string      | 父导航ID     | 父导航ID  |
 | moduleID    | string      | module表ID   |  导航菜单下的文章默认使用的模型字段 |
 | comCode     | string      | 逗号隔开的全路径 | 逗号隔开的全路径  |
-| templateID  | string      | 模板Id       | 当前导航页的模板  |
-| childTemplateID  | string | 子主题模板Id  | 子页面默认使用的模板,子页面如果不设置,默认使用这个模板 |
+| templateFile  | string      | 模板文件       | 当前导航页的模板  |
+| childTemplateFile  | string | 子主题模板文件  | 子页面默认使用的模板,子页面如果不设置,默认使用这个模板 |
 | createTime  | string      | 创建时间     |  2006-01-02 15:04:05  |
 | updateTime  | string      | 更新时间     |  2006-01-02 15:04:05  |
 | createUser  | string      | 创建人       |  初始化 system  |
@@ -197,7 +197,7 @@ ID默认使用时间戳(23位)+随机数(9位),全局唯一.
 | categoryName| string      | 导航菜单,逗号(,)隔开| 是| 使用 jieba 分词器.      |
 | categoryID  | string      | 导航ID       | 否      | -                       |
 | comCode     | string      | 逗号隔开的全路径 | 逗号隔开的全路径  |
-| templateID  | string      | 模板Id       | 否      | 模板                    |
+| templateFile  | string      | 模板文件       | 否      | 模板                    |
 | content     | string      | 文章内容     | 否      |                         |
 | markdown    | string      | Markdown内容 | 否      |                         |
 | thumbnail   | string      | 封面图       | 否      |                         |
